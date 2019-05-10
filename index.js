@@ -16,7 +16,6 @@ mongoose.Promise = global.Promise;
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
 
 require('./models/User');
-require('./models/Project');
 
 require('./services/passport');
 
