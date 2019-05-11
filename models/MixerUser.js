@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const userSchema = new Schema({
+const mixerUserSchema = new Schema({
+  _id: String,
   user: {
     username: {
       type: String,
@@ -35,6 +36,4 @@ const userSchema = new Schema({
   provider: String,
 });
 
-const User = mongoose.model('Users', userSchema);
-
-module.exports = User;
+mongoose.model('MixerUser', mixerUserSchema);
