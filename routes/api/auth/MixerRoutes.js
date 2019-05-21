@@ -28,4 +28,12 @@ router.get('/callback',
     res.redirect('/');
   });
 
+router.get('/current', (req, res) => {
+  res.send({
+    user: {
+      id: 123123123,
+    },
+  });
+});
+
 module.exports = router;
