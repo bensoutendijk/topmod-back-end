@@ -29,13 +29,7 @@ app.use(require('./routes'));
 
 const server = http.createServer(app);
 
-const io = socketIO(server);
-
-io.on('connection', (socket) => {
-  socket.on('alert', (color) => {
-    io.sockets.emit('alert', color);
-  });
-});
+app.io = socketIO(server);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
