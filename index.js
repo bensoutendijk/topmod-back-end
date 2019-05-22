@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -25,7 +27,17 @@ require('./services/passport');
 
 app.use(require('./routes'));
 
+const server = http.createServer(app);
+
+const io = socketIO(server);
+
+io.on('connection', (socket) => {
+  socket.on('alert', (color) => {
+    io.sockets.emit('alert', color);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log('Listening on port ', PORT);
 });

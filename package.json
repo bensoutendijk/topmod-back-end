@@ -27,7 +27,8 @@
     "nodemon": "^1.18.9",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "passport-mixer": "^1.0.1"
+    "passport-mixer": "^1.0.1",
+    "socket.io": "^2.2.0"
   },
   "eslintConfig": {
     "extends": [
