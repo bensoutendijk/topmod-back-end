@@ -24,15 +24,14 @@ router.get('/login',
 
 router.get('/callback',
   passport.authenticate('mixer', { failureRedirect: '/login' }), (req, res) => {
+    console.log(req.user);
     // Successful authentication, redirect home.
     res.redirect('/');
   });
 
 router.get('/current', (req, res) => {
   res.send({
-    user: {
-      id: 123123123,
-    },
+    _id: 123,
   });
 });
 
