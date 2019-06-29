@@ -120,7 +120,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 router.get('/current', auth.required, (req, res) => {
   const { payload: { _id } } = req;
 
-  return User.findById(_id)
+  User.findById(_id)
     .then((user) => {
       if (!user) {
         return res.sendStatus(400);
