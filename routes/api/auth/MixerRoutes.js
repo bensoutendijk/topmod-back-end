@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const passport = require('passport');
 const router = require('express').Router();
+const auth = require('../../auth');
 
 const MixerUser = mongoose.model('MixerUser');
 
@@ -44,6 +45,13 @@ router.get('/callback',
         return res.header('MongooseError', err.message);
       }
       console.log(`${mixerUser.user.username}'s token's have been updated successfully.`);
+      res.cookie('token', `Token ${mixerUser.generateHttpOnlyJWT()}`, {
+        expires: new Date(Date.now() + 1000 * 60 * 30),
+        httpOnly: true,
+      });
+      res.cookie('token2', `Token ${mixerUser.generateJWT()}`, {
+        expires: new Date(Date.now() + 1000 * 60 * 30),
+      });
     } else {
       const finalMixerUser = new MixerUser({
         _id: profile._id,
@@ -67,6 +75,13 @@ router.get('/callback',
         return res.header('MongooseError', err.message);
       }
       console.log(`${profile.user.username} has been saved to the database.`);
+      res.cookie('token', `Token ${finalMixerUser.generateHttpOnlyJWT()}`, {
+        expires: new Date(Date.now() + 1000 * 60 * 30),
+        httpOnly: true,
+      });
+      res.cookie('token2', `Token ${finalMixerUser.generateJWT()}`, {
+        expires: new Date(Date.now() + 1000 * 60 * 30),
+      });
     }
 
     // Successful authentication, redirect home.
@@ -74,10 +89,8 @@ router.get('/callback',
   });
 
 
-router.get('/current', (req, res) => {
-  res.send({
-    _id: 123,
-  });
+router.get('/current', auth.required, (req, res) => {
+  res.send(req.payload.user);
 });
 
 module.exports = router;
