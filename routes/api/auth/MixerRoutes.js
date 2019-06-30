@@ -66,9 +66,11 @@ router.get('/callback',
           expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
         },
         provider: profile.provider,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
-      try {        
+      try {
         await finalMixerUser.save();
       } catch (err) {
         console.log(err);

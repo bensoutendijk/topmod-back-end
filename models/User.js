@@ -11,6 +11,8 @@ const userSchema = new Schema({
   permissions: [{ type: String }],
   hash: String,
   salt: String,
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 userSchema.methods.setPassword = function (password) {

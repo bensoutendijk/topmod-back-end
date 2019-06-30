@@ -7,6 +7,8 @@ const mixerChatEventSchema = new Schema({
   event: String,
   data: Object,
   channel: Number,
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 mongoose.model('MixerChatEvent', mixerChatEventSchema);

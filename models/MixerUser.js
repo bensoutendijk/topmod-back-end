@@ -36,6 +36,8 @@ const mixerUserSchema = new Schema({
     },
   },
   provider: String,
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 mixerUserSchema.methods.generateHttpOnlyJWT = function () {

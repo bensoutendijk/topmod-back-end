@@ -26,6 +26,8 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
       event: 'ChatMessage',
       channel: channelId,
       data,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     try {
       chatEvent.save();
@@ -40,6 +42,8 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
       event: 'DeleteMessage',
       channel: channelId,
       data,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     try {
       chatEvent.save();
@@ -54,6 +58,8 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
       event: 'UserUpdate',
       channel: channelId,
       data,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     try {
       chatEvent.save();
