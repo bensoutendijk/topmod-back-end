@@ -1,6 +1,5 @@
 const express = require('express');
 const http = require('http');
-const socketIO = require('socket.io');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -22,6 +21,7 @@ mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
 
 require('./models/User');
 require('./models/MixerUser');
+require('./models/MixerChatEvent');
 
 require('./services/passport');
 
@@ -29,7 +29,7 @@ app.use(require('./routes'));
 
 const server = http.createServer(app);
 
-app.io = socketIO(server);
+require('./services/mixerChat');
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
