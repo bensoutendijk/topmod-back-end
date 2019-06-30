@@ -3,6 +3,7 @@ const ws = require('ws');
 const mongoose = require('mongoose');
 
 const MixerChatEvent = mongoose.model('MixerChatEvent');
+const MixerUser = mongoose.model('MixerUser');
 
 function createChatSocket(userId, channelId, endpoints, authkey) {
   const socket = new Mixer.Socket(ws, endpoints).boot();
@@ -11,9 +12,7 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
   // methods. We spool them and run them when connected automatically.
   socket.auth(channelId, userId, authkey)
     .then(() => {
-      console.log('You are now authenticated!');
-      // Send a chat message
-      // return socket.call('msg', ['Hello world!']);
+      console.log(`${userId} authenticated!`);
     })
     .catch((error) => {
       console.error('Oh no! An error occurred.');
@@ -22,12 +21,42 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
 
   // Listen for chat messages. Note you will also receive your own!
   socket.on('ChatMessage', (data) => {
-    console.log('We got a ChatMessage packet!');
-    console.log(data);
-    const chatEvent = new MixerChatEvent(data);
-    chatEvent._id = data.id;
+    const chatEvent = new MixerChatEvent({
+      type: 'event',
+      event: 'ChatMessage',
+      channel: channelId,
+      data,
+    });
     try {
-      chatEvent.save(data);
+      chatEvent.save();
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  socket.on('DeleteMessage', (data) => {
+    const chatEvent = new MixerChatEvent({
+      type: 'event',
+      event: 'DeleteMessage',
+      channel: channelId,
+      data,
+    });
+    try {
+      chatEvent.save();
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  socket.on('UserUpdate', (data) => {
+    const chatEvent = new MixerChatEvent({
+      type: 'event',
+      event: 'UserUpdate',
+      channel: channelId,
+      data,
+    });
+    try {
+      chatEvent.save();
     } catch (err) {
       console.log(err);
     }
@@ -40,15 +69,28 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
   });
 }
 
-const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
-client.use(new Mixer.OAuthProvider(client, {}));
-
-new Mixer.ChatService(client).join(22984210)
-  .then((response) => {
-    const { body } = response;
-    return createChatSocket(null, 22984210, body.endpoints);
-  })
-  .catch((error) => {
-    console.error('Something went wrong.');
-    console.error(error);
+MixerUser.find({}, (err, users) => {
+  users.forEach((profile) => {
+    const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
+    client.use(new Mixer.OAuthProvider(client, {
+      tokens: {
+        access: profile.tokens.accessToken,
+        expires: Date.now() + (365 * 24 * 60 * 60 * 1000),
+      },
+    }));
+    new Mixer.ChatService(client).join(profile.user.channelid)
+      .then((response) => {
+        const { body } = response;
+        return createChatSocket(
+          profile.user.userid,
+          profile.user.channelid,
+          body.endpoints,
+          body.authkey,
+        );
+      })
+      .catch((error) => {
+        console.error('Something went wrong.');
+        console.error(error);
+      });
   });
+});

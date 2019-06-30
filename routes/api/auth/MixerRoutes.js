@@ -34,9 +34,9 @@ router.get('/callback',
     const mixerUser = await MixerUser.findById(profile._id);
 
     if (mixerUser) {
-      mixerUser.user.username = profile.user.username; /* eslint-disable-line no-param-reassign */
-      mixerUser.tokens.accessToken = profile.tokens.accessToken; /* eslint-disable-line no-param-reassign max-len */
-      mixerUser.tokens.refreshToken = profile.tokens.refreshToken; /* eslint-disable-line no-param-reassign max-len */
+      mixerUser.user.username = profile.user.username;
+      mixerUser.tokens.accessToken = profile.tokens.accessToken;
+      mixerUser.tokens.refreshToken = profile.tokens.refreshToken;
 
       try {
         await mixerUser.save();
