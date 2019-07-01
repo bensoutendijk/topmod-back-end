@@ -14,17 +14,59 @@ async function mixerChat() {
     client.use(new Mixer.OAuthProvider(client, {
       clientId: keys.mixerClientId,
       secret: keys.mixerClientSecret,
+      tokens: {
+        access: profile.tokens.accessToken,
+        refresh: profile.tokens.refreshToken,
+        expires: Date.now() + (365 * 24 * 60 * 60 * 1000),
+      },
     }));
 
-    const res = await client.request('POST', '/oauth/token', {
-      grant_type: 'refresh_token',
-      refresh_token: profile.tokens.refreshToken,
+    const oauth = client.getProvider();
+    oauth.refresh().then(() => {
+      const { access, refresh } = client.getProvider().tokens;
+      profile.tokens = {
+        accessToken: access,
+        refreshToken: refresh,
+        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
+      };
+      try {
+        profile.save();
+        console.log(`${profile.user.username}'s tokens successfully updated!`);
+      } catch (err) {
+        console.log(err);
+      }
     });
 
-    console.log(res.body);
+    const { body: chat } = await new Mixer.ChatService(client).join(profile.user.channelid);
 
-    const { body: currentUser } = await client.request('GET', 'users/current');
-    const { body: chat } = await new Mixer.ChatService(client).join(currentUser.channel.id);
+    const socket = new Mixer.Socket(ws, chat.endpoints).boot();
+
+    if (chat.authkey) {
+      try {
+        console.log(`${profile.user.username}'s been authenticated`);
+        socket.auth(profile.user.channelid, profile.user.userid, chat.authkey);
+      } catch (err) {
+        console.log('Auth error');
+        console.log(err);
+      }
+    } else {
+      try {
+        console.log(`${profile.user.username} not authenticated`);
+        socket.auth(profile.user.channelid);
+      } catch (err) {
+        console.log('Auth error');
+        console.log(err);
+      }
+    }
+
+    socket.on('error', (error) => {
+      console.error('Socket error');
+      console.error(error);
+    });
+
+    socket.on('ChatMessage', (data) => {
+      console.log(data);
+    });
   });
 }
 
@@ -100,29 +142,3 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
     throw new Error(error);
   });
 }
-
-// MixerUser.find({}, (err, users) => {
-//   users.forEach((profile) => {
-//     const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
-    // client.use(new Mixer.OAuthProvider(client, {
-    //   tokens: {
-    //     access: profile.tokens.accessToken,
-    //     expires: Date.now() + (365 * 24 * 60 * 60 * 1000),
-    //   },
-    // }));
-//     new Mixer.ChatService(client).join(profile.user.channelid)
-//       .then((response) => {
-//         const { body } = response;
-//         return createChatSocket(
-//           profile.user.userid,
-//           profile.user.channelid,
-//           body.endpoints,
-//           body.authkey,
-//         );
-//       })
-//       .catch((error) => {
-//         console.error('Something went wrong.');
-//         console.error(error);
-//       });
-//   });
-// });
