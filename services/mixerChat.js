@@ -1,9 +1,34 @@
 const Mixer = require('@mixer/client-node');
 const ws = require('ws');
 const mongoose = require('mongoose');
+const keys = require('../config/keys');
 
 const MixerChatEvent = mongoose.model('MixerChatEvent');
 const MixerUser = mongoose.model('MixerUser');
+
+async function mixerChat() {
+  const users = await MixerUser.find({});
+  users.forEach(async (profile) => {
+    const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
+
+    client.use(new Mixer.OAuthProvider(client, {
+      clientId: keys.mixerClientId,
+      secret: keys.mixerClientSecret,
+    }));
+
+    const res = await client.request('POST', '/oauth/token', {
+      grant_type: 'refresh_token',
+      refresh_token: profile.tokens.refreshToken,
+    });
+
+    console.log(res.body);
+
+    const { body: currentUser } = await client.request('GET', 'users/current');
+    const { body: chat } = await new Mixer.ChatService(client).join(currentUser.channel.id);
+  });
+}
+
+mixerChat();
 
 function createChatSocket(userId, channelId, endpoints, authkey) {
   const socket = new Mixer.Socket(ws, endpoints).boot();
@@ -72,31 +97,32 @@ function createChatSocket(userId, channelId, endpoints, authkey) {
   socket.on('error', (error) => {
     console.error('Socket error');
     console.error(error);
+    throw new Error(error);
   });
 }
 
-MixerUser.find({}, (err, users) => {
-  users.forEach((profile) => {
-    const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
-    client.use(new Mixer.OAuthProvider(client, {
-      tokens: {
-        access: profile.tokens.accessToken,
-        expires: Date.now() + (365 * 24 * 60 * 60 * 1000),
-      },
-    }));
-    new Mixer.ChatService(client).join(profile.user.channelid)
-      .then((response) => {
-        const { body } = response;
-        return createChatSocket(
-          profile.user.userid,
-          profile.user.channelid,
-          body.endpoints,
-          body.authkey,
-        );
-      })
-      .catch((error) => {
-        console.error('Something went wrong.');
-        console.error(error);
-      });
-  });
-});
+// MixerUser.find({}, (err, users) => {
+//   users.forEach((profile) => {
+//     const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
+    // client.use(new Mixer.OAuthProvider(client, {
+    //   tokens: {
+    //     access: profile.tokens.accessToken,
+    //     expires: Date.now() + (365 * 24 * 60 * 60 * 1000),
+    //   },
+    // }));
+//     new Mixer.ChatService(client).join(profile.user.channelid)
+//       .then((response) => {
+//         const { body } = response;
+//         return createChatSocket(
+//           profile.user.userid,
+//           profile.user.channelid,
+//           body.endpoints,
+//           body.authkey,
+//         );
+//       })
+//       .catch((error) => {
+//         console.error('Something went wrong.');
+//         console.error(error);
+//       });
+//   });
+// });
