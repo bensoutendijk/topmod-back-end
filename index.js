@@ -23,13 +23,12 @@ require('./models/User');
 require('./models/MixerUser');
 require('./models/MixerChatEvent');
 
+require('./services/mixer');
 require('./services/passport');
 
 app.use(require('./routes'));
 
 const server = http.createServer(app);
-
-require('./services/mixerChat');
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
