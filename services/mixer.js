@@ -45,6 +45,14 @@ function refresh(client, profile) {
 }
 
 async function connect(client, profile) {
+  const events = [
+    'ChatMessage',
+    'DeleteMessage',
+    'UserJoin',
+    'UserLeave',
+    'SkillAttribution',
+  ];
+
   const res = await new Mixer.ChatService(client).join(profile.user.channelid);
   const { body: chat } = res;
   const socket = new Mixer.Socket(ws, chat.endpoints).boot();
@@ -57,6 +65,34 @@ async function connect(client, profile) {
       console.log(err);
     }
   }
+
+  socket.on('error', (error) => {
+    console.error('Socket error');
+    console.error(error);
+  });
+
+  events.forEach((event) => {
+    socket.on(event, (data) => {
+      console.log(data);
+    });
+  });
+
+  socket.on('ChatMessage', (data) => {
+    console.log(data);
+  });
+  socket.on('DeleteMessage', (data) => {
+    console.log(data);
+  });
+  socket.on('UserJoin', (data) => {
+    console.log(data);
+  });
+  socket.on('UserLeave', (data) => {
+    console.log(data);
+  });
+  socket.on('SkillAttribution', (data) => {
+    console.log(data);
+  });
+
   return socket;
 }
 
@@ -66,15 +102,6 @@ async function start() {
     const client = getMixerClient(profile);
     await refresh(client, profile);
     const socket = await connect(client, profile);
-
-    socket.on('error', (error) => {
-      console.error('Socket error');
-      console.error(error);
-    });
-
-    socket.on('ChatMessage', (data) => {
-      console.log(data);
-    });
   });
 }
 
