@@ -23,7 +23,7 @@ require('./models/User');
 require('./models/MixerUser');
 require('./models/MixerChatEvent');
 
-require('./services/mixer');
+require('./routes/mixerChat').start();
 require('./services/passport');
 
 app.use(require('./routes'));
