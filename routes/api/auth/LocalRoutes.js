@@ -11,33 +11,25 @@ router.post('/', auth.optional, async (req, res) => {
 
   if (!user.email) {
     return res.status(422).json({
-      errors: {
-        email: 'is required',
-      },
+      email: 'is required',
     });
   }
 
   if (!user.password) {
     return res.status(422).json({
-      errors: {
-        password: 'is required',
-      },
+      password: 'is required',
     });
   }
 
   if (!user.passwordConfirmation) {
     return res.status(422).json({
-      errors: {
-        passwordConfirmation: 'is required',
-      },
+      passwordConfirmation: 'is required',
     });
   }
 
   if (user.password !== user.passwordConfirmation) {
     return res.status(442).json({
-      errors: {
-        passwordConfirmation: 'does not match',
-      },
+      passwordConfirmation: 'does not match',
     });
   }
 
@@ -51,9 +43,7 @@ router.post('/', auth.optional, async (req, res) => {
       await finalUser.save();
     } catch (err) {
       return res.json({
-        errors: {
-          user: 'Something went wrong',
-        },
+        user: 'Something went wrong',
       });
     }
     res.cookie('token', `Token ${finalUser.generateHttpOnlyJWT()}`, {
@@ -66,9 +56,7 @@ router.post('/', auth.optional, async (req, res) => {
     return res.json({ user: finalUser.toJSON() });
   }
   return res.status(442).json({
-    errors: {
-      email: 'already exists',
-    },
+    email: 'already exists',
   });
 });
 
@@ -78,17 +66,13 @@ router.post('/login', auth.optional, (req, res, next) => {
 
   if (!user.email) {
     return res.status(422).json({
-      errors: {
-        email: 'is required',
-      },
+      email: 'is required',
     });
   }
 
   if (!user.password) {
     return res.status(422).json({
-      errors: {
-        password: 'is required',
-      },
+      password: 'is required',
     });
   }
 
@@ -108,10 +92,8 @@ router.post('/login', auth.optional, (req, res, next) => {
       return res.json({ user: passportUser.toJSON() });
     }
 
-    return res.status(400).json({
-      errors: {
-        authentication: 'failure',
-      },
+    return res.status(422).json({
+      authentication: 'email not registered',
     });
   })(req, res, next);
 });
