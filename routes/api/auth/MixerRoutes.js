@@ -6,21 +6,22 @@ const mixerChat = require('../../mixerChat');
 
 const MixerUser = mongoose.model('MixerUser');
 
-router.get('/login',
-  passport.authenticate('mixer', {
-    scope: [
-      'chat:connect',
-      'chat:view_deleted',
-      'channel:analytics:self',
-      'channel:details:self',
-      'user:details:self',
-      'user:analytics:self',
-    ],
-  }));
+router.get('/login', auth.required, passport.authenticate('mixer', {
+  scope: [
+    'chat:connect',
+    'chat:view_deleted',
+    'channel:analytics:self',
+    'channel:details:self',
+    'user:details:self',
+    'user:analytics:self',
+  ],
+}));
 
 router.get('/callback',
+  auth.required,
   passport.authenticate('mixer', { failureRedirect: '/login' }), async (req, res) => {
     const { user: profile } = req;
+    const { payload: localUser } = req;
 
     const mixerUser = await MixerUser.findById(profile._id);
     if (mixerUser) {
@@ -35,15 +36,9 @@ router.get('/callback',
         return res.header('MongooseError', err.message);
       }
       console.log(`${mixerUser.user.username}'s token's have been updated successfully.`);
-      res.cookie('token', `Token ${mixerUser.generateHttpOnlyJWT()}`, {
-        expires: new Date(Date.now() + 1000 * 60 * 30),
-        httpOnly: true,
-      });
-      res.cookie('token2', `Token ${mixerUser.generateJWT()}`, {
-        expires: new Date(Date.now() + 1000 * 60 * 30),
-      });
     } else {
       const finalMixerUser = new MixerUser({
+        localUser: localUser._id,
         _id: profile._id,
         user: {
           username: profile.user.username,
@@ -75,23 +70,10 @@ router.get('/callback',
       } catch (err) {
         console.log(err);
       }
-
-      res.cookie('token', `Token ${finalMixerUser.generateHttpOnlyJWT()}`, {
-        expires: new Date(Date.now() + 1000 * 60 * 30),
-        httpOnly: true,
-      });
-      res.cookie('token2', `Token ${finalMixerUser.generateJWT()}`, {
-        expires: new Date(Date.now() + 1000 * 60 * 30),
-      });
     }
 
     // Successful authentication, redirect home.
     return res.redirect('/');
   });
-
-
-router.get('/current', auth.required, (req, res) => {
-  res.send(req.payload.user);
-});
 
 module.exports = router;

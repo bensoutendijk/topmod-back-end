@@ -6,6 +6,7 @@ const keys = require('../config/keys');
 const { Schema } = mongoose;
 
 const mixerUserSchema = new Schema({
+  localUser: String,
   _id: String,
   user: {
     username: {
