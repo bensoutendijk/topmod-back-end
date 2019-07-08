@@ -1,4 +1,4 @@
-const Mixer = require('@mixer/client-node');
+const MixerClient = require('@mixer/client-node');
 const ws = require('ws');
 
 const mongoose = require('mongoose');
@@ -8,14 +8,14 @@ const keys = require('../config/keys');
 const MixerChatEvent = mongoose.model('MixerChatEvent');
 const MixerUser = mongoose.model('MixerUser');
 
-const MixerChat = {
+const Mixer = {
   getUsers() {
     return MixerUser.find({});
   },
 
   getMixerClient(profile) {
-    const client = new Mixer.Client(new Mixer.DefaultRequestRunner());
-    client.use(new Mixer.OAuthProvider(client, {
+    const client = new MixerClient.Client(new MixerClient.DefaultRequestRunner());
+    client.use(new MixerClient.OAuthProvider(client, {
       clientId: keys.mixerClientId,
       secret: keys.mixerClientSecret,
       tokens: {
@@ -37,6 +37,7 @@ const MixerChat = {
           refreshToken,
           expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
         });
+        profile.set('updatedAt', Date.now());
         return profile.save();
       })
       .catch((err) => {
@@ -47,9 +48,9 @@ const MixerChat = {
 
   async connect(client, profile) {
     const { user: { channelid, username, userid } } = profile;
-    const res = await new Mixer.ChatService(client).join(channelid);
+    const res = await new MixerClient.ChatService(client).join(channelid);
     const { body: chat } = res;
-    const socket = new Mixer.Socket(ws, chat.endpoints).boot();
+    const socket = new MixerClient.Socket(ws, chat.endpoints).boot();
     if (chat.authkey) {
       try {
         console.log(`${username}'s been authenticated`);
@@ -103,4 +104,4 @@ const MixerChat = {
   },
 };
 
-module.exports = MixerChat;
+module.exports = Mixer;

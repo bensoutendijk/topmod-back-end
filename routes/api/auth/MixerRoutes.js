@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const passport = require('passport');
 const router = require('express').Router();
+
 const auth = require('../../auth');
-const mixerChat = require('../../mixerChat');
+const Mixer = require('../../mixer');
 
 const MixerUser = mongoose.model('MixerUser');
 
@@ -28,6 +29,7 @@ router.get('/callback',
       mixerUser.user.username = profile.user.username;
       mixerUser.tokens.accessToken = profile.tokens.accessToken;
       mixerUser.tokens.refreshToken = profile.tokens.refreshToken;
+      mixerUser.updatedAt = Date.now();
 
       try {
         await mixerUser.save();
@@ -63,10 +65,10 @@ router.get('/callback',
         return res.header('MongooseError', err.message);
       }
 
-      const client = mixerChat.getMixerClient(finalMixerUser);
+      const client = Mixer.getMixerClient(finalMixerUser);
       try {
-        await mixerChat.refresh(client, finalMixerUser);
-        await mixerChat.connect(client, finalMixerUser);
+        await Mixer.refresh(client, finalMixerUser);
+        await Mixer.connect(client, finalMixerUser);
       } catch (err) {
         console.log(err);
       }
@@ -75,5 +77,11 @@ router.get('/callback',
     // Successful authentication, redirect home.
     return res.redirect('/');
   });
+
+router.get('/current', auth.required, async (req, res) => {
+  const { payload: localUser } = req;
+  const mixerUser = await MixerUser.findOne({ localUser: localUser._id });
+  res.send(mixerUser);
+});
 
 module.exports = router;
