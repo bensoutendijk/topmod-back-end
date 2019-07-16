@@ -1,0 +1,15 @@
+FEATURES
+  MIXER
+    - refresh access tokens on interval
+    - live-monitor of chat
+  TWITCH
+    - add twitch oauth
+    - live-monitor twitch chat and channel mods
+    - get recent twitch streams
+  TWITTER
+    - add twitter oauth
+    - get stats from twitter API
+  INSTAGRAM/FACEBOOK
+    - get unbanned?
+  TOP
+    - monitor top streams to display public stats
