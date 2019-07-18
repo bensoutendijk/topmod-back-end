@@ -16,9 +16,9 @@ app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Connect to Database
 mongoose.Promise = global.Promise;
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
-
 require('./models/User');
 require('./models/MixerUser');
 require('./models/MixerChatEvent');

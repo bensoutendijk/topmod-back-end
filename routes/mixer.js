@@ -9,10 +9,6 @@ const MixerChatEvent = mongoose.model('MixerChatEvent');
 const MixerUser = mongoose.model('MixerUser');
 
 const Mixer = {
-  getUsers() {
-    return MixerUser.find({});
-  },
-
   getMixerClient(profile) {
     const client = new MixerClient.Client(new MixerClient.DefaultRequestRunner());
     client.use(new MixerClient.OAuthProvider(client, {
@@ -48,17 +44,24 @@ const Mixer = {
 
   async connect(client, profile) {
     const { user: { channelid, username, userid } } = profile;
+    console.log('Getting Chat Endpoints...');
+    console.log(client);
     const res = await new MixerClient.ChatService(client).join(channelid);
     const { body: chat } = res;
+    console.log(chat);
+    console.log('Booting WebSocket...');
     const socket = new MixerClient.Socket(ws, chat.endpoints).boot();
+
     if (chat.authkey) {
       try {
-        console.log(`${username}'s been authenticated`);
         socket.auth(channelid, userid, chat.authkey);
+        console.log(`${username}'s been authenticated`);
       } catch (err) {
         console.log('Auth error');
         console.log(err);
       }
+    } else {
+      console.log('No Chat Authentication Key Found');
     }
 
     socket.on('error', (error) => {
@@ -95,10 +98,15 @@ const Mixer = {
   },
 
   async start() {
-    const users = await this.getUsers();
+    console.log('Starting Mixer Service');
+    const users = await MixerUser.find({});
+    console.log(`found ${users.length} MixerUsers`);
     users.forEach(async (profile) => {
-      const client = this.getMixerClient(profile);
+      console.log(`Creating Mixer Client for ${profile.user.username}`);
+      const client = await this.getMixerClient(profile);
+      console.log(`Refreshing Tokens for ${profile.user.username}`);
       await this.refresh(client, profile);
+      console.log(`Connecting to Chat for ${profile.user.username}`);
       await this.connect(client, profile);
     });
   },
