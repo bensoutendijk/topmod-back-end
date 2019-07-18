@@ -23,7 +23,7 @@ const Mixer = {
     return client;
   },
 
-  refresh(client, profile) {
+  async refresh(client, profile) {
     const oauth = client.getProvider();
     oauth.refresh()
       .then(() => {
@@ -49,6 +49,28 @@ const Mixer = {
     console.log('Booting WebSocket...');
     const socket = new MixerClient.Socket(ws, chat.endpoints).boot();
 
+    const accessToken = client.getProvider().tokens.access;
+    const refreshToken = client.getProvider().tokens.refresh;
+
+    const { body: accessTokenIntrospect } = await client.request(
+      'POST',
+      '/oauth/token/introspect',
+      {
+        body: {
+          token: accessToken,
+        },
+      },
+    );
+    const { body: refreshTokenIntrospect } = await client.request(
+      'POST',
+      '/oauth/token/introspect',
+      {
+        body: {
+          token: refreshToken,
+        },
+      },
+    );
+
     if (chat.authkey) {
       try {
         socket.auth(channelid, userid, chat.authkey);
@@ -59,6 +81,8 @@ const Mixer = {
       }
     } else {
       console.log('No Chat Authentication Key Found');
+      console.log(accessTokenIntrospect);
+      console.log(refreshTokenIntrospect);
     }
 
     socket.on('error', (error) => {
