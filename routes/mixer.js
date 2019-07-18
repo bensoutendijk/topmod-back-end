@@ -45,10 +45,7 @@ const Mixer = {
   async connect(client, profile) {
     const { user: { channelid, username, userid } } = profile;
     console.log('Getting Chat Endpoints...');
-    console.log(client);
-    const res = await new MixerClient.ChatService(client).join(channelid);
-    const { body: chat } = res;
-    console.log(chat);
+    const { body: chat } = await client.request('GET', `/chats/${channelid}`);
     console.log('Booting WebSocket...');
     const socket = new MixerClient.Socket(ws, chat.endpoints).boot();
 
