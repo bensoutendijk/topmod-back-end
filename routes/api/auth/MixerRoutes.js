@@ -81,7 +81,7 @@ router.get('/callback',
 router.get('/current', auth.required, async (req, res) => {
   const { payload: localUser } = req;
   const mixerUser = await MixerUser.findOne({ localUser: localUser._id });
-  res.send(mixerUser);
+  res.send(mixerUser.user);
 });
 
 module.exports = router;
