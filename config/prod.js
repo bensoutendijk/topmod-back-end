@@ -5,5 +5,5 @@ module.exports = {
   jwtKey: process.env.JWT_SECRET,
   mixerClientId: process.env.MIXER_CLIENT_ID,
   mixerClientSecret: process.env.MIXER_CLIENT_SECRET,
-  mixerCallbackUrl: 'https://bgood.tv/api/auth/mixer/callback',
+  mixerCallbackUrl: 'https://topmod.soutendijk.com/api/auth/mixer/callback',
 };
