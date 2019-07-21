@@ -2,7 +2,6 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const axios = require('axios');
 
-const Mixer = require('../../mixer');
 const auth = require('../../auth');
 
 
@@ -13,13 +12,13 @@ router.get('/streams', auth.required, async (req, res) => {
 
   const profile = await MixerUser.findOne({ localUser: _id });
   const dateFrom = new Date(1970, 1, 1).toISOString();
-  const URI = `/channels/${profile.user.channelid}/analytics/tsdb/streamSessions?from=${dateFrom}`;
+  const URI = `https://mixer.com/api/v1/channels/${profile.user.channelid}/analytics/tsdb/streamSessions?from=${dateFrom}`;
 
-  const client = await Mixer.getMixerClient(profile);
+  const { data } = await axios.get(URI, {
+    headers: { Authorization: `bearer ${profile.tokens.accessToken}` },
+  });
 
-  const { body: streamList } = await client.request('GET', URI);
-
-  res.send(streamList);
+  res.send(data);
 });
 
 router.get('/users/:role', auth.required, async (req, res) => {

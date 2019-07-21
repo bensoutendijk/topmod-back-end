@@ -3,7 +3,6 @@ const passport = require('passport');
 const router = require('express').Router();
 
 const auth = require('../../auth');
-const Mixer = require('../../mixer');
 
 const MixerUser = mongoose.model('MixerUser');
 
@@ -63,14 +62,6 @@ router.get('/callback',
       } catch (err) {
         console.log(err);
         return res.header('MongooseError', err.message);
-      }
-
-      const client = Mixer.getMixerClient(finalMixerUser);
-      try {
-        await Mixer.refresh(client, finalMixerUser);
-        await Mixer.connect(client, finalMixerUser);
-      } catch (err) {
-        console.log(err);
       }
     }
 
