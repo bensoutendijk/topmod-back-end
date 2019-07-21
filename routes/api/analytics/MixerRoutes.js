@@ -12,8 +12,8 @@ router.get('/streams', auth.required, async (req, res) => {
   const { payload: { _id } } = req;
 
   const profile = await MixerUser.findOne({ localUser: _id });
-  const fromDate = new Date(1970, 1, 1).toISOString();
-  const URI = `/channels/${profile.user.channelid}/analytics/tsdb/streamSessions?from=${fromDate}`;
+  const dateFrom = new Date(1970, 1, 1).toISOString();
+  const URI = `/channels/${profile.user.channelid}/analytics/tsdb/streamSessions?from=${dateFrom}`;
 
   const client = await Mixer.getMixerClient(profile);
 
@@ -32,6 +32,32 @@ router.get('/users/:role', auth.required, async (req, res) => {
   const { data } = await axios.get(URI);
 
   res.send(data);
+});
+
+router.get('/viewers', auth.required, async (req, res) => {
+  const { payload: { _id } } = req;
+  let { query: { to: dateTo, from: dateFrom } } = req;
+
+  if (!dateTo) {
+    dateTo = new Date().toISOString();
+  }
+
+  if (!dateFrom) {
+    dateFrom = new Date(1970, 1, 1).toISOString();
+  }
+
+  const profile = await MixerUser.findOne({ localUser: _id });
+
+  const URI = `https://mixer.com/api/v1/channels/${profile.user.channelid}/analytics/tsdb/viewers?from=${dateFrom}&to=${dateTo}`;
+
+  try {
+    const { data } = await axios.get(URI, {
+      headers: { Authorization: `bearer ${profile.tokens.accessToken}` },
+    });
+    res.send(data);
+  } catch (err) {
+    res.send(err.response.data);
+  }
 });
 
 module.exports = router;
