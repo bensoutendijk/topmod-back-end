@@ -27,10 +27,7 @@ router.get('/users/:role', auth.required, async (req, res) => {
   const { params: { role } } = req;
   const profile = await MixerUser.findOne({ localUser: _id });
 
-  let URI = `https://mixer.com/api/v1/channels/${profile.user.channelid}/users`;
-  if (role) {
-    URI = `https://mixer.com/api/v1/channels/${profile.user.channelid}/users/${role}`;
-  }
+  const URI = `https://mixer.com/api/v1/channels/${profile.user.channelid}/users/${role}`;
 
   const { data } = await axios.get(URI);
 
