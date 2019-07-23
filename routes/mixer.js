@@ -26,27 +26,33 @@ const refreshTokens = async (mixerUser) => {
       client_secret: keys.mixerClientSecret,
     });
     if (data.error) {
-      throw new Error(JSON.stringify(data.error));
+      throw new Error('Mixer Token Error');
     }
+    Object.assign(mixerUser, {
+      tokens: {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: Date.now() + data.expires_in,
+      },
+    });
+    await mixerUser.save();
   } catch (err) {
-    console.log('Error: Could not refresh tokens');
-    console.log(err.response.data);
+    console.log(err);
   }
 };
 
 const mixer = {
   auth: async (req, res, next) => {
-    const { payload: localUser } = req;
-    const mixerUser = await MixerUser.findOne({ localUser: localUser._id });
-
-    const accessTokenIntrospect = await tokenIntrospect(mixerUser.tokens.accessToken);
-
-    if (accessTokenIntrospect.active) {
-      res.mixerUser = mixerUser;
-      next();
-    } else {
-      refreshTokens(mixerUser);
+    const { payload: localProfile } = req;
+    const mixerUser = await MixerUser.findOne({ localUser: localProfile._id });
+    if (mixerUser) {
+      const accessTokenIntrospect = await tokenIntrospect(mixerUser.tokens.accessToken);
+      if (accessTokenIntrospect.active) {
+        req.mixerUser = mixerUser;
+        return next();
+      }
     }
+    return next();
   },
 };
 

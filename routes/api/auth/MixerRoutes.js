@@ -5,10 +5,40 @@ const router = require('express').Router();
 const auth = require('../../auth');
 const mixer = require('../../mixer');
 
+const User = mongoose.model('User');
 const MixerUser = mongoose.model('MixerUser');
 
-const updateMixerUser = async (mixerUser, profile) => {
-  Object.assign(mixerUser, profile);
+const createMixerUser = async (mixerProfile, localUser) => {
+  const finalMixerUser = new MixerUser({
+    localUser: localUser._id,
+    _id: mixerProfile._id,
+    user: {
+      username: mixerProfile.user.username,
+      userid: mixerProfile._id,
+      channelid: mixerProfile.user.channelid,
+    },
+    tokens: {
+      accessToken: mixerProfile.tokens.accessToken,
+      refreshToken: mixerProfile.tokens.refreshToken,
+      expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 365,
+    },
+    provider: mixerProfile.provider,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+
+  localUser.services.push('mixer');
+
+  try {
+    await finalMixerUser.save();
+    await localUser.save();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateMixerUser = async (mixerProfile, mixerUser) => {
+  Object.assign(mixerUser, mixerProfile);
 
   try {
     await mixerUser.save();
@@ -31,39 +61,16 @@ router.get('/login', auth.required, passport.authenticate('mixer', {
 router.get('/callback',
   auth.required,
   passport.authenticate('mixer', { failureRedirect: '/login' }), async (req, res) => {
-    const { user: profile } = req;
-    const { payload: localUser } = req;
+    const { user: mixerProfile } = req;
+    const { payload: localProfile } = req;
 
-    const mixerUser = await MixerUser.findById(profile._id);
+    const mixerUser = await MixerUser.findById(mixerProfile._id);
+    const localUser = await User.findById(localProfile._id);
 
     if (mixerUser) {
-      updateMixerUser(mixerUser, profile);
+      updateMixerUser(mixerProfile, mixerUser);
     } else {
-      const finalMixerUser = new MixerUser({
-        localUser: localUser._id,
-        _id: profile._id,
-        user: {
-          username: profile.user.username,
-          userid: profile._id,
-          channelid: profile.user.channelid, /* eslint-disable-line no-underscore-dangle */
-        },
-        tokens: {
-          accessToken: profile.tokens.accessToken,
-          refreshToken: profile.tokens.refreshToken,
-          expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
-        },
-        provider: profile.provider,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-
-      try {
-        await finalMixerUser.save();
-        console.log(`${profile.user.username} has been saved to the database.`);
-      } catch (err) {
-        console.log(err);
-        return res.header('MongooseError', err.message);
-      }
+      createMixerUser(mixerProfile, localUser);
     }
 
     // Successful authentication, redirect home.
@@ -72,7 +79,10 @@ router.get('/callback',
 
 router.get('/current', auth.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
-  res.send(mixerUser.user);
+  if (mixerUser) {
+    return res.send(mixerUser.user);
+  }
+  return res.sendStatus(400);
 });
 
 module.exports = router;

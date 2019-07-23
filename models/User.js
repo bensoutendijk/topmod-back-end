@@ -9,6 +9,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   email: { type: String, index: true },
   permissions: [{ type: String }],
+  services: [{ type: String }],
   hash: String,
   salt: String,
   createdAt: Date,
@@ -54,6 +55,7 @@ userSchema.methods.toJSON = function () {
     _id: this._id, // eslint-disable-line no-underscore-dangle
     email: this.email,
     permissions: this.permissions,
+    services: this.services,
   };
 };
 
