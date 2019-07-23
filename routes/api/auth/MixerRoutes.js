@@ -3,8 +3,19 @@ const passport = require('passport');
 const router = require('express').Router();
 
 const auth = require('../../auth');
+const mixer = require('../../mixer');
 
 const MixerUser = mongoose.model('MixerUser');
+
+const updateMixerUser = async (mixerUser, profile) => {
+  Object.assign(mixerUser, profile);
+
+  try {
+    await mixerUser.save();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 router.get('/login', auth.required, passport.authenticate('mixer', {
   scope: [
@@ -24,19 +35,9 @@ router.get('/callback',
     const { payload: localUser } = req;
 
     const mixerUser = await MixerUser.findById(profile._id);
-    if (mixerUser) {
-      mixerUser.user.username = profile.user.username;
-      mixerUser.tokens.accessToken = profile.tokens.accessToken;
-      mixerUser.tokens.refreshToken = profile.tokens.refreshToken;
-      mixerUser.updatedAt = Date.now();
 
-      try {
-        await mixerUser.save();
-      } catch (err) {
-        console.log(err);
-        return res.header('MongooseError', err.message);
-      }
-      console.log(`${mixerUser.user.username}'s token's have been updated successfully.`);
+    if (mixerUser) {
+      updateMixerUser(mixerUser, profile);
     } else {
       const finalMixerUser = new MixerUser({
         localUser: localUser._id,
@@ -69,9 +70,8 @@ router.get('/callback',
     return res.redirect('/');
   });
 
-router.get('/current', auth.required, async (req, res) => {
-  const { payload: localUser } = req;
-  const mixerUser = await MixerUser.findOne({ localUser: localUser._id });
+router.get('/current', auth.required, mixer.auth, async (req, res) => {
+  const { mixerUser } = req;
   res.send(mixerUser.user);
 });
 

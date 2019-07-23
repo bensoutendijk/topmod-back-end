@@ -7,7 +7,7 @@ const User = mongoose.model('User');
 
 // POST new user route (optional, everyone has access)
 router.post('/', auth.optional, async (req, res) => {
-  const { body: { user } } = req;
+  const { body: user } = req;
 
   if (!user.email) {
     return res.status(422).json({
