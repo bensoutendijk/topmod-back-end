@@ -17,7 +17,6 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
       const { data } = await axios.get(URI, {
         headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
       });
-      console.log('getting streams');
       return res.send(data);
     } catch (err) {
       console.log(err);
