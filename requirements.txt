@@ -3,9 +3,8 @@ FRONT END
     - Add live-chat ✔
     - Add mods list ✔
     - Add basic Stream metrics
+      Individual Streams
       - number: average viewers ✔
-      - bar chart: averages x day
-      - bar chart: averages x month
   CALENDAR
     - Expand details of events from all connected platforms on calendar view
   REPORTS
