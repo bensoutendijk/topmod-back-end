@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const axios = require('axios');
-const uuid = require('uuid');
 
 const auth = require('../../auth');
 const mixer = require('../../mixer');
@@ -21,12 +20,11 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
     const streamsURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/streamSessions?from=${dateFrom}&to=${dateTo}`;
 
     try {
-      const { data } = await axios.get(streamsURI, {
+      const { data: streams } = await axios.get(streamsURI, {
         headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
       });
 
-      const streams = await Promise.all(data.map(async (stream) => {
-        const streamId = `${new Date(stream.time).getTime()}${stream.channel}`;
+      const finalStreams = await Promise.all(streams.map(async (stream) => {
         const streamStart = new Date(stream.time).toISOString();
         const streamEnd = new Date(
           new Date(stream.time).getTime() + stream.duration * 1000,
@@ -36,37 +34,53 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
         const viewersURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/viewers?from=${streamStart}&to=${streamEnd}`;
         const followersURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/followers?from=${streamStart}&to=${streamEnd}`;
         const subscriptionsURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/subscriptions?from=${streamStart}&to=${streamEnd}`;
-        
+
+        // Assign Id to stream
+        const streamId = `${new Date(stream.time).getTime()}${stream.channel}`;
+        Object.assign(stream, { id: streamId });
+
         // Get type info from mixer API
-        const { data: game } = await axios.get(typesURI);
+        try {
+          const { data: game } = await axios.get(typesURI);
+          Object.assign(stream, { game });
+        } catch (err) {
+          console.log(err.response);
+        }
 
         // Get Viewership info mixer API
-        const { data: viewership } = await axios.get(viewersURI, {
-          headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
-        });
+        try {
+          const { data: viewership } = await axios.get(viewersURI, {
+            headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
+          });
+          Object.assign(stream, { viewership });
+        } catch (err) {
+          console.log(err.response);
+        }
 
         // Get Followers info from mixer API
-        const { data: followers } = await axios.get(followersURI, {
-          headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
-        });
+        try {
+          const { data: followers } = await axios.get(followersURI, {
+            headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
+          });
+          Object.assign(stream, { followers });
+        } catch (err) {
+          console.log(err.response);
+        }
 
         // Get Subscriptions info from mixer API
-        const { data: subscriptions } = await axios.get(subscriptionsURI, {
-          headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
-        });
-
-        Object.assign(stream, {
-          id: streamId,
-          game,
-          viewership,
-          followers,
-          subscriptions,
-        });
+        try {
+          const { data: subscriptions } = await axios.get(subscriptionsURI, {
+            headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
+          });
+          Object.assign(stream, { subscriptions });
+        } catch (err) {
+          console.log(err.response);
+        }
 
         return stream;
       }));
 
-      return res.send(streams);
+      return res.send(finalStreams);
     } catch (err) {
       console.log(err);
     }
