@@ -82,7 +82,7 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
 
       return res.send(finalStreams);
     } catch (err) {
-      console.log(err);
+      console.log(err.response);
     }
   }
   return res.sendStatus(400);
