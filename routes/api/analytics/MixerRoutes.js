@@ -26,6 +26,7 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
       });
 
       const streams = await Promise.all(data.map(async (stream) => {
+        const streamId = `${new Date(stream.time).getTime()}${stream.channel}`;
         const streamStart = new Date(stream.time).toISOString();
         const streamEnd = new Date(
           new Date(stream.time).getTime() + stream.duration * 1000,
@@ -55,7 +56,7 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
         });
 
         Object.assign(stream, {
-          id: uuid.v4(),
+          id: streamId,
           game,
           viewership,
           followers,
