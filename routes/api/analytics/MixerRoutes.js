@@ -1,12 +1,9 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
 const axios = require('axios');
 const uuid = require('uuid');
 
 const auth = require('../../auth');
 const mixer = require('../../mixer');
-
-const MixerUser = mongoose.model('MixerUser');
 
 router.get('/streams', auth.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
@@ -56,16 +53,33 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
   return res.sendStatus(400);
 });
 
-router.get('/users/:role', auth.required, async (req, res) => {
-  const { payload: { _id } } = req;
+router.get('/users/:role', auth.required, mixer.auth, async (req, res) => {
+  const { mixerUser } = req;
   const { params: { role } } = req;
-  const mixerUser = await MixerUser.findOne({ localUser: _id });
   if (mixerUser) {
-    const URI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/users/${role}`;
+    try {
+      const URI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/users/${role}`;
+      const { data } = await axios.get(URI);
 
-    const { data } = await axios.get(URI);
+      const users = await Promise.all(data.map(async (user) => {
+        const chattersURI = `https://mixer.com/api/v2/chats/${mixerUser.user.channelid}/users/${user.id}`;
 
-    return res.send(data);
+        try {
+          const { data: chatter } = await axios.get(chattersURI);
+          if (chatter.userId === user.id) {
+            Object.assign(user, { active: true });
+          }
+        } catch (err) {
+          Object.assign(user, { active: false });
+          return user;
+        }
+        return user;
+      }));
+
+      return res.send(users);
+    } catch (err) {
+      console.log(err);
+    }
   }
   return res.sendStatus(400);
 });
