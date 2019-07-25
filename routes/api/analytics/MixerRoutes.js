@@ -26,21 +26,41 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
       });
 
       const streams = await Promise.all(data.map(async (stream) => {
-        const typesURI = `https://mixer.com/api/v1/types/${stream.type}`;
-
-        const { data: game } = await axios.get(typesURI);
-
         const streamStart = new Date(stream.time).toISOString();
         const streamEnd = new Date(
           new Date(stream.time).getTime() + stream.duration * 1000,
         ).toISOString();
-        const viewersURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/viewers?from=${streamStart}&to=${streamEnd}`;
 
+        const typesURI = `https://mixer.com/api/v1/types/${stream.type}`;
+        const viewersURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/viewers?from=${streamStart}&to=${streamEnd}`;
+        const followersURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/followers?from=${streamStart}&to=${streamEnd}`;
+        const subscriptionsURI = `https://mixer.com/api/v1/channels/${mixerUser.user.channelid}/analytics/tsdb/subscriptions?from=${streamStart}&to=${streamEnd}`;
+        
+        // Get type info from mixer API
+        const { data: game } = await axios.get(typesURI);
+
+        // Get Viewership info mixer API
         const { data: viewership } = await axios.get(viewersURI, {
           headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
         });
 
-        Object.assign(stream, { viewership, game, id: uuid.v4() });
+        // Get Followers info from mixer API
+        const { data: followers } = await axios.get(followersURI, {
+          headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
+        });
+
+        // Get Subscriptions info from mixer API
+        const { data: subscriptions } = await axios.get(subscriptionsURI, {
+          headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
+        });
+
+        Object.assign(stream, {
+          id: uuid.v4(),
+          game,
+          viewership,
+          followers,
+          subscriptions,
+        });
 
         return stream;
       }));
@@ -71,7 +91,6 @@ router.get('/users/:role', auth.required, mixer.auth, async (req, res) => {
           }
         } catch (err) {
           Object.assign(user, { active: false });
-          return user;
         }
         return user;
       }));
