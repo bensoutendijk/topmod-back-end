@@ -5,6 +5,7 @@ FRONT END
     - Add basic Stream metrics
       Individual Streams
       - number: average viewers ✔
+      - line chart: stream viewership ✔
   CALENDAR
     - Expand details of events from all connected platforms on calendar view
   REPORTS

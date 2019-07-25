@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const axios = require('axios');
+const uuid = require('uuid');
 
 const auth = require('../../auth');
 const mixer = require('../../mixer');
@@ -28,6 +29,10 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
       });
 
       const streams = await Promise.all(data.map(async (stream) => {
+        const typesURI = `https://mixer.com/api/v1/types/${stream.type}`;
+
+        const { data: game } = await axios.get(typesURI);
+
         const streamStart = new Date(stream.time).toISOString();
         const streamEnd = new Date(
           new Date(stream.time).getTime() + stream.duration * 1000,
@@ -38,7 +43,7 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
           headers: { Authorization: `bearer ${mixerUser.tokens.accessToken}` },
         });
 
-        Object.assign(stream, { viewership });
+        Object.assign(stream, { viewership, game, id: uuid.v4() });
 
         return stream;
       }));
