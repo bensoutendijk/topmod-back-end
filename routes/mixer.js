@@ -26,7 +26,7 @@ const refreshTokens = async (mixerUser) => {
       client_secret: keys.mixerClientSecret,
     });
     if (data.error) {
-      throw new Error('Mixer Token Error');
+      throw new Error('MixerUser Token Error');
     }
     Object.assign(mixerUser, {
       tokens: {
@@ -35,9 +35,14 @@ const refreshTokens = async (mixerUser) => {
         expiresAt: Date.now() + data.expires_in,
       },
     });
-    await mixerUser.save();
+    try {
+      await mixerUser.save();
+    } catch (err) {
+      throw new Error('MixerUser Error');
+    }
+    return mixerUser.tokens;
   } catch (err) {
-    console.log(err);
+    throw new Error('MixerUser Token Error');
   }
 };
 
@@ -51,6 +56,8 @@ const mixer = {
         req.mixerUser = mixerUser;
         return next();
       }
+      refreshTokens(mixerUser);
+      req.mixerUser = mixerUser;
     }
     return next();
   },
