@@ -2,10 +2,14 @@ FRONT END
   DASHBOARD
     - Add live-chat ✔
     - Add mods list ✔
-    - Add basic Stream metrics
-      Individual Streams
+    - Add basic Stream metrics ✔
+      INDIVIDUAL STREAMS
       - number: average viewers ✔
       - line chart: stream viewership ✔
+      OVERALL STREAMS
+      - group: recent streams ✔
+      - group: best streams in date filters
+      - group: best games for streaming in date filters
   CALENDAR
     - Expand details of events from all connected platforms on calendar view
   REPORTS
@@ -14,12 +18,11 @@ FRONT END
     - Detailed statistics on mod activity
   SERVICES
     - Add images/logos for each platform
-    - Allow reauthorization of platforms
-
+    - Allow reauthorization of platforms ✔
 FEATURES
   MIXER
-    - refresh access tokens on interval
-    - live-monitor of chat
+    - refresh access tokens when expired
+    - live-monitor of chat ✔
   TWITCH
     - add twitch oauth
     - live-monitor twitch chat and channel mods
@@ -28,6 +31,6 @@ FEATURES
     - add twitter oauth
     - get stats from twitter API
   INSTAGRAM/FACEBOOK
-    - get unbanned?
+    - get unbanned? ✔
   TOP
     - monitor top streams to display public stats
