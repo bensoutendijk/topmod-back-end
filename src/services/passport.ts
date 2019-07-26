@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 import passport from 'passport';
 import * as passportLocal from 'passport-local';
 import * as passportMixer from 'passport-mixer';
-const { mixerClientId, mixerClientSecret, mixerCallbackUrl } = require('../config/keys');
+import keys from '../config/keys';
+
+const { mixerClientId, mixerClientSecret, mixerCallbackUrl } = keys;
 
 const User = mongoose.model('User');
 
@@ -29,8 +31,6 @@ passport.use(new passportLocal.Strategy({
       return done(null, user);
     }).catch(done);
 }));
-
-console.log(mixerClientId);
 
 passport.use(new passportMixer.Strategy({
   clientID: mixerClientId,
