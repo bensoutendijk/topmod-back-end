@@ -1,5 +1,5 @@
-const jwt = require('express-jwt');
-const keys = require('../config/keys');
+import jwt from 'express-jwt';
+import keys from '../config/keys';
 
 const getHttpOnlyToken = (req) => {
   const { token } = req.cookies;
@@ -45,4 +45,4 @@ const auth = {
   ],
 };
 
-module.exports = auth;
+export default auth;

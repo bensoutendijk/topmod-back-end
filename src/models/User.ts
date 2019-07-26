@@ -1,8 +1,8 @@
 /* eslint-disable func-names */
-const mongoose = require('mongoose');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
+import mongoose from 'mongoose';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import keys from '../config/keys';
 
 const { Schema } = mongoose;
 
@@ -34,7 +34,7 @@ userSchema.methods.generateHttpOnlyJWT = function () {
   return jwt.sign({
     email: this.email,
     _id: this._id, // eslint-disable-line no-underscore-dangle
-    exp: parseInt(expirationDate.getTime() / 1000, 10),
+    exp: (expirationDate.getTime() / 1000, 10),
   }, keys.jwtHttpOnlyKey);
 };
 
@@ -46,7 +46,7 @@ userSchema.methods.generateJWT = function () {
   return jwt.sign({
     email: this.email,
     _id: this._id, // eslint-disable-line no-underscore-dangle
-    exp: parseInt(expirationDate.getTime() / 1000, 10),
+    exp: (expirationDate.getTime() / 1000, 10),
   }, keys.jwtKey);
 };
 

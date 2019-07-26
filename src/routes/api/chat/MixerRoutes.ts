@@ -1,8 +1,9 @@
-const router = require('express').Router();
-const axios = require('axios');
-const mongoose = require('mongoose');
-const auth = require('../../auth');
+import express from 'express';
+import axios from 'axios';
+import mongoose from 'mongoose';
+import auth from '../../auth';
 
+const router = express.Router();
 const MixerUser = mongoose.model('MixerUser');
 
 router.get('/history', auth.required, async (req, res) => {
@@ -39,4 +40,4 @@ router.get('/', auth.required, async (req, res) => {
   return res.sendStatus(400);
 });
 
-module.exports = router;
+export default router;

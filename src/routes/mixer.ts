@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const axios = require('axios');
+import mongoose from 'mongoose';
+import axios from 'axios';
+import keys from '../config/keys';
 
 const MixerUser = mongoose.model('MixerUser');
 
-const keys = require('../config/keys');
 
 const tokenIntrospect = async (token) => {
   const URI = 'https://mixer.com/api/v1/oauth/token/introspect';
@@ -63,4 +63,4 @@ const mixer = {
   },
 };
 
-module.exports = mixer;
+export default mixer;

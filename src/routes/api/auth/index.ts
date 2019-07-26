@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 
 const router = express.Router();
 
 router.use('/local', require('./LocalRoutes'));
 router.use('/mixer', require('./MixerRoutes'));
 
-module.exports = router;
+export default router;

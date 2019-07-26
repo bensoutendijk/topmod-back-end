@@ -1,8 +1,10 @@
-const router = require('express').Router();
-const axios = require('axios');
+import express from 'express';
+import axios from 'axios';
 
-const auth = require('../../auth');
-const mixer = require('../../mixer');
+import auth from '../../auth';
+import mixer from '../../mixer';
+
+const router = express.Router();
 
 router.get('/streams', auth.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
@@ -146,4 +148,4 @@ router.get('/viewers', auth.required, mixer.auth, async (req, res) => {
   return res.sendStatus(400);
 });
 
-module.exports = router;
+export default router;

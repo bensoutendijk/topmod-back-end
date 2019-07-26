@@ -1,10 +1,11 @@
-const mongoose = require('mongoose');
-const passport = require('passport');
-const router = require('express').Router();
+import mongoose from 'mongoose';
+import passport from 'passport';
+import express from 'express';
 
-const auth = require('../../auth');
-const mixer = require('../../mixer');
+import auth from '../../auth';
+import mixer from '../../mixer';
 
+const router = express.Router();
 const User = mongoose.model('User');
 const MixerUser = mongoose.model('MixerUser');
 
@@ -85,4 +86,4 @@ router.get('/current', auth.required, mixer.auth, async (req, res) => {
   return res.sendStatus(400);
 });
 
-module.exports = router;
+export default router;

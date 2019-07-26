@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
-const passport = require('passport');
-const router = require('express').Router();
-const auth = require('../../auth');
+import mongoose from 'mongoose';
+import passport from 'passport';
+import express from 'express';
+import auth from '../../auth';
 
+const router = express.Router();
 const User = mongoose.model('User');
 
 // POST new user route (optional, everyone has access)
@@ -117,4 +118,4 @@ router.get('/current', auth.required, (req, res) => {
     });
 });
 
-module.exports = router;
+export default router;

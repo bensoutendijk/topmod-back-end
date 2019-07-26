@@ -1,3 +1,6 @@
+BACK END
+ - Work around rate-limiting on mixer api calls
+
 FRONT END
   DASHBOARD
     - Add live-chat ✔

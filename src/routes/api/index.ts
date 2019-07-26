@@ -6,4 +6,4 @@ router.use('/auth', require('./auth'));
 router.use('/chat', require('./chat'));
 router.use('/analytics', require('./analytics'));
 
-module.exports = router;
+export default router;

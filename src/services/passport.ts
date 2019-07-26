@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const MixerStrategy = require('passport-mixer').Strategy;
-
+import mongoose from 'mongoose';
+import passport from 'passport';
+import * as passportLocal from 'passport-local';
+import * as passportMixer from 'passport-mixer';
 const { mixerClientId, mixerClientSecret, mixerCallbackUrl } = require('../config/keys');
 
 const User = mongoose.model('User');
@@ -17,21 +16,23 @@ passport.deserializeUser((id, done) => {
   });
 });
 
-passport.use(new LocalStrategy({
+passport.use(new passportLocal.Strategy({
   usernameField: 'email',
   passwordField: 'password',
 }, (email, password, done) => {
   User.findOne({ email })
     .then((user) => {
       if (!user || !user.validatePassword(password)) {
-        return done(null, false, { errors: { 'email or password': 'is invalid' } });
+        return done(null, false, { message: 'email or password is invalid' });
       }
 
       return done(null, user);
     }).catch(done);
 }));
 
-passport.use(new MixerStrategy({
+console.log(mixerClientId);
+
+passport.use(new passportMixer.Strategy({
   clientID: mixerClientId,
   clientSecret: mixerClientSecret,
   callbackURL: mixerCallbackUrl,

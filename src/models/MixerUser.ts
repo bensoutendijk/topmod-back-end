@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const keys = require('../config/keys');
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import keys from '../config/keys';
 
 const { Schema } = mongoose;
 
@@ -51,7 +51,7 @@ mixerUserSchema.methods.generateHttpOnlyJWT = function () {
     user: this.user, // eslint-disable-line no-underscore-dangle
     tokens: this.tokens,
     provider: this.provider,
-    exp: parseInt(expirationDate.getTime() / 1000, 10),
+    exp: (expirationDate.getTime() / 1000, 10),
   }, keys.jwtHttpOnlyKey);
 };
 
@@ -65,7 +65,7 @@ mixerUserSchema.methods.generateJWT = function () {
     user: this.user, // eslint-disable-line no-underscore-dangle
     tokens: this.tokens,
     provider: this.provider,
-    exp: parseInt(expirationDate.getTime() / 1000, 10),
+    exp: (expirationDate.getTime() / 1000, 10),
   }, keys.jwtKey);
 };
 
