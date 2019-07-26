@@ -6,15 +6,9 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import keys from './config/keys';
+import routes from './routes';
 
-const app = express();
 
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Connect to Database
 mongoose.Promise = global.Promise;
@@ -25,7 +19,16 @@ require('./models/MixerChatEvent');
 
 require('./services/passport');
 
-app.use(require('./routes'));
+// Create express app
+const app = express();
+
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(routes);
 
 const server = http.createServer(app);
 
