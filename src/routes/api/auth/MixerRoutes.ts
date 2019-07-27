@@ -64,8 +64,6 @@ router.get('/callback',
     const { user: mixerProfile } = req;
     const { payload: localProfile } = req;
 
-    console.log(mixerProfile);
-
     const mixerUser = await MixerUser.findOne({ user: { userid: mixerProfile._id } }) as IMixerUserModel;
     const localUser = await LocalUser.findById(localProfile._id) as ILocalUserModel;
 
