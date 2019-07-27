@@ -47,7 +47,7 @@ const updateMixerUser = async (mixerProfile, mixerUser) => {
   }
 };
 
-router.get('/login', auth.required, passport.authenticate('mixer', {
+router.get('/login', auth.local.required, passport.authenticate('mixer', {
   scope: [
     'chat:connect',
     'chat:view_deleted',
@@ -59,13 +59,13 @@ router.get('/login', auth.required, passport.authenticate('mixer', {
 }));
 
 router.get('/callback',
-  auth.required,
+  auth.local.required,
   passport.authenticate('mixer', { failureRedirect: '/login' }), async (req, res) => {
     const { user: mixerProfile } = req;
-    const { payload: localProfile } = req;
+    const { localAuth } = req;
 
     const mixerUser = await MixerUser.findOne({ user: { userid: mixerProfile._id } }) as IMixerUserModel;
-    const localUser = await LocalUser.findById(localProfile._id) as ILocalUserModel;
+    const localUser = await LocalUser.findById(localAuth._id) as ILocalUserModel;
 
     if (mixerUser) {
       updateMixerUser(mixerProfile, mixerUser);
@@ -77,7 +77,7 @@ router.get('/callback',
     return res.redirect('/');
   });
 
-router.get('/current', auth.required, mixer.auth, async (req, res) => {
+router.get('/current', auth.local.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
   if (mixerUser) {
     return res.send(mixerUser.user);

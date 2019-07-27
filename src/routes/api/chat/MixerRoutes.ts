@@ -7,10 +7,10 @@ import { IMixerUserModel } from '../../../models/MixerUser';
 const router = express.Router();
 const MixerUser = mongoose.model('MixerUser');
 
-router.get('/history', auth.required, async (req, res) => {
-  const { payload: { _id } } = req;
+router.get('/history', auth.local.required, async (req, res) => {
+  const { localAuth } = req;
 
-  const mixerUser = await MixerUser.findOne({ localUser: _id }) as IMixerUserModel;
+  const mixerUser = await MixerUser.findOne({ localUser: localAuth._id }) as IMixerUserModel;
 
   if (mixerUser) {
     const URI = `https://mixer.com/api/v1/chats/${mixerUser.user.channelid}/history`;
@@ -25,10 +25,10 @@ router.get('/history', auth.required, async (req, res) => {
   return res.sendStatus(400);
 });
 
-router.get('/', auth.required, async (req, res) => {
-  const { payload: { _id } } = req;
+router.get('/', auth.local.required, async (req, res) => {
+  const { localAuth } = req;
 
-  const mixerUser = await MixerUser.findOne({ localUser: _id }) as IMixerUserModel;
+  const mixerUser = await MixerUser.findOne({ localUser: localAuth._id }) as IMixerUserModel;
   if (mixerUser) {
     const URI = `https://mixer.com/api/v1/chats/${mixerUser.user.channelid}`;
 

@@ -6,7 +6,7 @@ import mixer from '../../mixer';
 
 const router = express.Router();
 
-router.get('/streams', auth.required, mixer.auth, async (req, res) => {
+router.get('/streams', auth.local.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
   let { query: { to: dateTo, from: dateFrom } } = req;
 
@@ -90,7 +90,7 @@ router.get('/streams', auth.required, mixer.auth, async (req, res) => {
   return res.sendStatus(400);
 });
 
-router.get('/users/:role', auth.required, mixer.auth, async (req, res) => {
+router.get('/users/:role', auth.local.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
   const { params: { role } } = req;
   if (mixerUser) {
@@ -120,7 +120,7 @@ router.get('/users/:role', auth.required, mixer.auth, async (req, res) => {
   return res.sendStatus(400);
 });
 
-router.get('/viewers', auth.required, mixer.auth, async (req, res) => {
+router.get('/viewers', auth.local.required, mixer.auth, async (req, res) => {
   const { mixerUser } = req;
   let { query: { to: dateTo, from: dateFrom } } = req;
 

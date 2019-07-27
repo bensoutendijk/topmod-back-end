@@ -8,7 +8,7 @@ const router = express.Router();
 const LocalUser = mongoose.model('LocalUser');
 
 // POST new user route (optional, everyone has access)
-router.post('/', auth.optional, async (req, res) => {
+router.post('/', auth.local.optional, async (req, res) => {
   const { body: user } = req;
 
   if (!user.email) {
@@ -55,7 +55,7 @@ router.post('/', auth.optional, async (req, res) => {
     res.cookie('token2', `Token ${finalUser.generateJWT()}`, {
       expires: new Date(Date.now() + 1000 * 60 * 30),
     });
-    return res.json({ user: finalUser.toJSON() });
+    return res.json(finalUser.toJSON());
   }
   return res.status(442).json({
     email: 'already exists',
@@ -63,7 +63,7 @@ router.post('/', auth.optional, async (req, res) => {
 });
 
 // POST login route (optional, everyone has access)
-router.post('/login', auth.optional, (req, res, next) => {
+router.post('/login', auth.local.optional, (req, res, next) => {
   const { body: user } = req;
   if (!user.email) {
     return res.status(422).json({
@@ -90,7 +90,7 @@ router.post('/login', auth.optional, (req, res, next) => {
       res.cookie('token2', `Token ${passportUser.generateJWT()}`, {
         expires: new Date(Date.now() + 1000 * 60 * 30),
       });
-      return res.json({ user: passportUser.toJSON() });
+      return res.json(passportUser.toJSON());
     }
 
     return res.status(422).json({
@@ -100,10 +100,10 @@ router.post('/login', auth.optional, (req, res, next) => {
 });
 
 // GET current route (required, only authenticated users have access)
-router.get('/current', auth.required, (req, res) => {
-  const { payload: { _id } } = req;
+router.get('/current', auth.local.required, (req, res) => {
+  const { localAuth } = req;
 
-  LocalUser.findById(_id)
+  LocalUser.findById(localAuth._id)
     .then((user: ILocalUserModel) => {
       if (!user) {
         return res.sendStatus(400);
@@ -115,7 +115,7 @@ router.get('/current', auth.required, (req, res) => {
       res.cookie('token2', `Token ${user.generateJWT()}`, {
         expires: new Date(Date.now() + 1000 * 60 * 30),
       });
-      return res.json({ user: user.toJSON() });
+      return res.json(user.toJSON());
     });
 });
 
