@@ -1,6 +1,12 @@
 import jwt from 'express-jwt';
 import keys from '../config/keys';
 
+const handleErrorMiddleware = (err, req, res, next) => {
+  if (err.name === 'UnauthorizedError' ) {
+    return res.status(400).send({ user: 'not authorized' });
+  }
+}
+
 const getHttpOnlyToken = (req) => {
   const { token } = req.cookies;
   if (token && token.split(' ')[0] === 'Token') {
@@ -17,32 +23,35 @@ const getToken = (req) => {
 };
 
 const auth = {
-  required: [
-    jwt({
-      secret: keys.jwtHttpOnlyKey,
-      userProperty: 'payload',
-      getToken: getHttpOnlyToken,
-    }),
-    jwt({
-      secret: keys.jwtKey,
-      userProperty: 'payload',
-      getToken,
-    }),
-  ],
-  optional: [
-    jwt({
-      secret: keys.jwtHttpOnlyKey,
-      userProperty: 'payload',
-      getToken: getHttpOnlyToken,
-      credentialsRequired: false,
-    }),
-    jwt({
-      secret: keys.jwtKey,
-      userProperty: 'payload',
-      getToken,
-      credentialsRequired: false,
-    }),
-  ],
+  local: {
+    required: [
+      jwt({
+        secret: keys.jwtHttpOnlyKey,
+        userProperty: 'localAuth',
+        getToken: getHttpOnlyToken,
+      }),
+      jwt({
+        secret: keys.jwtKey,
+        userProperty: 'localAuth',
+        getToken,
+      }),
+      handleErrorMiddleware
+    ],
+    optional: [
+      jwt({
+        secret: keys.jwtHttpOnlyKey,
+        userProperty: 'localAuth',
+        getToken: getHttpOnlyToken,
+        credentialsRequired: false,
+      }),
+      jwt({
+        secret: keys.jwtKey,
+        userProperty: 'localAuth',
+        getToken,
+        credentialsRequired: false,
+      }),
+    ],
+  }
 };
 
 export default auth;
