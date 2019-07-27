@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "precompile": "rimraf build",
-    "build": "tsc && node build/index.js",
+    "build": "npx tsc",
     "dev": "nodemon --watch src/ --exec \"npm run build\" --verbose -e ts",
     "start": "node build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -73,5 +73,8 @@
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
     "typescript": "^3.5.3"
+  },
+  "engines": {
+    "node": "10.x"
   }
 }
