@@ -2,9 +2,10 @@ import mongoose from 'mongoose';
 import passport from 'passport';
 import express from 'express';
 import auth from '../../auth';
+import { ILocalUserModel } from '../../../models/LocalUser';
 
 const router = express.Router();
-const User = mongoose.model('User');
+const LocalUser = mongoose.model('LocalUser');
 
 // POST new user route (optional, everyone has access)
 router.post('/', auth.optional, async (req, res) => {
@@ -34,10 +35,10 @@ router.post('/', auth.optional, async (req, res) => {
     });
   }
 
-  const existingUser = await User.findOne({ email: user.email });
+  const existingUser = await LocalUser.findOne({ email: user.email });
 
   if (!existingUser) {
-    const finalUser = new User(user);
+    const finalUser = new LocalUser(user) as ILocalUserModel;
 
     finalUser.setPassword(user.password);
     try {
@@ -102,8 +103,8 @@ router.post('/login', auth.optional, (req, res, next) => {
 router.get('/current', auth.required, (req, res) => {
   const { payload: { _id } } = req;
 
-  User.findById(_id)
-    .then((user) => {
+  LocalUser.findById(_id)
+    .then((user: ILocalUserModel) => {
       if (!user) {
         return res.sendStatus(400);
       }

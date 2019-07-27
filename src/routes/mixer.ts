@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import axios from 'axios';
 import keys from '../config/keys';
+import { IMixerUserModel } from '../models/MixerUser';
 
-const MixerUser = mongoose.model('MixerUser');
+const MixerUser = mongoose.model<IMixerUserModel>('MixerUser');
 
 
 const tokenIntrospect = async (token) => {

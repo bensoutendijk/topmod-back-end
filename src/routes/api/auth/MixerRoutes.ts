@@ -4,15 +4,16 @@ import express from 'express';
 
 import auth from '../../auth';
 import mixer from '../../mixer';
+import { IMixerUserModel } from '../../../models/MixerUser';
+import { ILocalUserModel } from '../../../models/LocalUser';
 
 const router = express.Router();
-const User = mongoose.model('User');
-const MixerUser = mongoose.model('MixerUser');
+const LocalUser = mongoose.model('LocalUser');
+const MixerUser = mongoose.model<IMixerUserModel>('MixerUser');
 
-const createMixerUser = async (mixerProfile, localUser) => {
+const createMixerUser = async (mixerProfile: IMixerUserModel, localUser: ILocalUserModel) => {
   const finalMixerUser = new MixerUser({
     localUser: localUser._id,
-    _id: mixerProfile._id,
     user: {
       username: mixerProfile.user.username,
       userid: mixerProfile._id,
@@ -24,8 +25,6 @@ const createMixerUser = async (mixerProfile, localUser) => {
       expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 365,
     },
     provider: mixerProfile.provider,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
   });
 
   localUser.services.push('mixer');
@@ -65,8 +64,10 @@ router.get('/callback',
     const { user: mixerProfile } = req;
     const { payload: localProfile } = req;
 
-    const mixerUser = await MixerUser.findById(mixerProfile._id);
-    const localUser = await User.findById(localProfile._id);
+    console.log(mixerProfile);
+
+    const mixerUser = await MixerUser.findOne({ user: { userid: mixerProfile._id } }) as IMixerUserModel;
+    const localUser = await LocalUser.findById(localProfile._id) as ILocalUserModel;
 
     if (mixerUser) {
       updateMixerUser(mixerProfile, mixerUser);

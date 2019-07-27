@@ -3,17 +3,18 @@ import passport from 'passport';
 import * as passportLocal from 'passport-local';
 import * as passportMixer from 'passport-mixer';
 import keys from '../config/keys';
+import { ILocalUserModel } from '../models/LocalUser';
 
 const { mixerClientId, mixerClientSecret, mixerCallbackUrl } = keys;
 
-const User = mongoose.model('User');
+const LocalUser = mongoose.model('LocalUser');
 
 passport.serializeUser((user, done) => {
   done(null, user);
 });
 
 passport.deserializeUser((id, done) => {
-  User.findById(id, (err, user) => {
+  LocalUser.findById(id, (err, user) => {
     done(err, user);
   });
 });
@@ -22,8 +23,8 @@ passport.use(new passportLocal.Strategy({
   usernameField: 'email',
   passwordField: 'password',
 }, (email, password, done) => {
-  User.findOne({ email })
-    .then((user) => {
+  LocalUser.findOne({ email })
+    .then((user: ILocalUserModel) => {
       if (!user || !user.validatePassword(password)) {
         return done(null, false, { message: 'email or password is invalid' });
       }

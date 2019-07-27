@@ -6,20 +6,20 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import keys from './config/keys';
-import routes from './routes';
 
 
 
 // Connect to Database
 mongoose.Promise = global.Promise;
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
-require('./models/User');
+require('./models/LocalUser');
 require('./models/MixerUser');
 require('./models/MixerChatEvent');
 
 require('./services/passport');
 
 // Create express app
+import routes from './routes';
 const app = express();
 
 app.use(cookieParser());

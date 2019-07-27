@@ -1,13 +1,16 @@
-/* eslint-disable func-names */
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import keys from '../config/keys';
+import { IOAuthUser, IMixerUser } from '../types';
 
-const { Schema } = mongoose;
+export interface IMixerUserModel extends Document, IOAuthUser {
+  user: IMixerUser,
+  generateHttpOnlyJWT: () => string,
+  generateJWT: () => string,
+}
 
 const mixerUserSchema = new Schema({
   localUser: String,
-  _id: String,
   user: {
     username: {
       type: String,
@@ -41,7 +44,7 @@ const mixerUserSchema = new Schema({
   updatedAt: Date,
 });
 
-mixerUserSchema.methods.generateHttpOnlyJWT = function () {
+mixerUserSchema.methods.generateHttpOnlyJWT = () => {
   const today = new Date();
   const expirationDate = new Date(today);
   expirationDate.setTime(today.getTime() + 1000 * 60 * 30);
@@ -51,11 +54,11 @@ mixerUserSchema.methods.generateHttpOnlyJWT = function () {
     user: this.user, // eslint-disable-line no-underscore-dangle
     tokens: this.tokens,
     provider: this.provider,
-    exp: (expirationDate.getTime() / 1000, 10),
+    exp: Math.floor(expirationDate.getTime() / 1000),
   }, keys.jwtHttpOnlyKey);
 };
 
-mixerUserSchema.methods.generateJWT = function () {
+mixerUserSchema.methods.generateJWT = () => {
   const today = new Date();
   const expirationDate = new Date(today);
   expirationDate.setTime(today.getTime() + 1000 * 60 * 30);
@@ -65,8 +68,8 @@ mixerUserSchema.methods.generateJWT = function () {
     user: this.user, // eslint-disable-line no-underscore-dangle
     tokens: this.tokens,
     provider: this.provider,
-    exp: (expirationDate.getTime() / 1000, 10),
+    exp: Math.floor(expirationDate.getTime() / 1000),
   }, keys.jwtKey);
 };
 
-mongoose.model('MixerUser', mixerUserSchema);
+mongoose.model<IMixerUserModel>('MixerUser', mixerUserSchema);
