@@ -49,8 +49,8 @@ const refreshTokens = async (mixerUser) => {
 
 const mixer = {
   auth: async (req, res, next) => {
-    const { payload: localProfile } = req;
-    const mixerUser = await MixerUser.findOne({ localUser: localProfile._id });
+    const { localAuth } = req;
+    const mixerUser = await MixerUser.findOne({ localUser: localAuth._id });
     if (mixerUser) {
       const accessTokenIntrospect = await tokenIntrospect(mixerUser.tokens.accessToken);
       if (accessTokenIntrospect.active) {
