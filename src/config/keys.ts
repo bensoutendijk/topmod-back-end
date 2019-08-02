@@ -1,8 +1,9 @@
-import * as prod from './prod';
-import * as dev from './dev';
+let keys;
 
-export default (process.env.NODE_ENV === 'production') ? (
-  prod
-) : (
-  dev
-);
+if (process.env.NODE_ENV === 'production')  {
+  keys = import('./prod');
+} else {
+  keys = import('./dev');
+}
+
+export default keys;
