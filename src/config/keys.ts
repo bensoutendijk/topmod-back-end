@@ -1,9 +1,9 @@
 let keys;
 
 if (process.env.NODE_ENV === 'production')  {
-  keys = import('./prod');
+  keys =  require('./prod');
 } else {
-  keys = import('./dev');
+  keys =  require('./dev');
 }
 
 export default keys;
