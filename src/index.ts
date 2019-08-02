@@ -7,8 +7,6 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import keys from './config/keys';
 
-
-
 // Connect to Database
 mongoose.Promise = global.Promise;
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
