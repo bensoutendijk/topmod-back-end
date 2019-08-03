@@ -3,17 +3,23 @@ import mongoose from 'mongoose';
 import localRoutes from './LocalRoutes';
 import mixerRoutes from './MixerRoutes';
 import auth from '../../auth';
+import { OAuthUserModel } from '../../../models/OAuthUser';
 
 const router = express.Router();
 const OAuthUser = mongoose.model('OAuthUser');
 
-router.get('/', auth.local.required, async (req, res) => {
+router.get('/users', auth.local.required, async (req, res) => {
   const { localAuth } = req;
-  const providerIds = localAuth.services.map(service => mongoose.Types.ObjectId(service));
+  const userIds = localAuth.services.map(service => mongoose.Types.ObjectId(service));
 
-  const providers = await OAuthUser.find({ _id: { $in: providerIds } });
+  const users = await OAuthUser.find({ _id: { $in: userIds } }) as OAuthUserModel[];
 
-  res.send(providers);
+  const data = users.map(user => ({
+    _id: user._id,
+    data: user.user,
+  }))
+
+  res.send(data);
 });
 
 router.use('/local', localRoutes);
