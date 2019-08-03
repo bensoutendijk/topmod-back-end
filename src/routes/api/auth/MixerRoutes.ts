@@ -26,7 +26,7 @@ const createMixerUser = async (mixerProfile: OAuthUserModel, localUser: ILocalUs
     provider: mixerProfile.provider,
   });
 
-  localUser.services.push('mixer');
+  localUser.services.push(finalMixerUser._id);
 
   try {
     await finalMixerUser.save();
