@@ -40,7 +40,9 @@ userSchema.methods.generateHttpOnlyJWT = function generateHttpOnlyJWT(): string 
 
   return jwt.sign({
     email: this.email,
-    _id: this._id, // eslint-disable-line no-underscore-dangle
+    _id: this._id, 
+    permissions: this.permissions,
+    services: this.services,
     exp: Math.floor(expirationDate.getTime() / 1000),
   }, keys.jwtHttpOnlyKey);
 };
@@ -52,7 +54,9 @@ userSchema.methods.generateJWT = function generateJWT(): string {
 
   return jwt.sign({
     email: this.email,
-    _id: this._id, // eslint-disable-line no-underscore-dangle
+    _id: this._id,
+    permissions: this.permissions,
+    services: this.services,
     exp: Math.floor(expirationDate.getTime() / 1000),
   }, keys.jwtKey);
 };

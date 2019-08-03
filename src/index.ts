@@ -11,8 +11,7 @@ import keys from './config/keys';
 mongoose.Promise = global.Promise;
 mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
 require('./models/LocalUser');
-require('./models/MixerUser');
-require('./models/MixerChatEvent');
+require('./models/OAuthUser');
 
 require('./services/passport');
 

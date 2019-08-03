@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import axios from 'axios';
 import keys from '../config/keys';
-import { IMixerUserModel } from '../models/MixerUser';
+import { OAuthUserModel } from '../models/OAuthUser';
 
-const MixerUser = mongoose.model<IMixerUserModel>('MixerUser');
+const OAuthUser = mongoose.model<OAuthUserModel>('OAuthUser');
 
 
 const tokenIntrospect = async (token) => {
@@ -50,7 +50,7 @@ const refreshTokens = async (mixerUser) => {
 const mixer = {
   auth: async (req, res, next) => {
     const { localAuth } = req;
-    const mixerUser = await MixerUser.findOne({ localUser: localAuth._id });
+    const mixerUser = await OAuthUser.findOne({ localUser: localAuth._id });
     if (mixerUser) {
       const accessTokenIntrospect = await tokenIntrospect(mixerUser.tokens.accessToken);
       if (accessTokenIntrospect.active) {
