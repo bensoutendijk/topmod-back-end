@@ -17,6 +17,7 @@ router.get('/users', auth.local.required, async (req, res) => {
   const data = users.map(user => ({
     _id: user._id,
     data: user.user,
+    provider: user.provider,
   }))
 
   res.send(data);
