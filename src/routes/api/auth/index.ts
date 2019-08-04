@@ -8,11 +8,28 @@ import { OAuthUserModel } from '../../../models/OAuthUser';
 const router = express.Router();
 const OAuthUser = mongoose.model('OAuthUser');
 
-router.get('/users', auth.local.required, async (req, res) => {
-  const { localAuth } = req;
-  const userIds = localAuth.services.map(service => mongoose.Types.ObjectId(service));
+router.get('/users/:userid', auth.local.required, async (req, res) => {
+  const { localAuth: { services} , params: { userid } } = req;
 
-  const users = await OAuthUser.find({ _id: { $in: userIds } }) as OAuthUserModel[];
+  if (!services.includes(userid)) {
+    return res.status(400).send({ service: 'not authorized' })
+  }
+
+  const users = await OAuthUser.find({ _id: userid }) as OAuthUserModel[];
+
+  const data = users.map(user => ({
+    _id: user._id,
+    data: user.user,
+    provider: user.provider,
+  }))
+
+  res.send(data);
+});
+
+router.get('/users', auth.local.required, async (req, res) => {
+  const { localAuth: {services} } = req;
+
+  const users = await OAuthUser.find({ _id: { $in: services } }) as OAuthUserModel[];
 
   const data = users.map(user => ({
     _id: user._id,
