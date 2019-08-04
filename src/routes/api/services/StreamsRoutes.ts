@@ -34,9 +34,15 @@ router.get('/', auth.local.required, async (req, res) => {
   switch (service.provider) {
     case 'mixer':
       const streamsURI = `https://mixer.com/api/v1/channels/${service.user.channelid}/analytics/tsdb/streamSessions?from=${dateFrom}&to=${dateTo}`;
-      const { data: streams } = await axios.get(streamsURI, {
+      let { data: streams } = await axios.get(streamsURI, {
         headers: { Authorization: `bearer ${service.tokens.accessToken}` },
       });
+
+      streams = streams.map(stream => ({
+        ...stream,
+        _id: stream.time,
+      }))
+
       return res.send(streams);
     default:
       return res.status(400).send({ service: 'unable to get streams' })
