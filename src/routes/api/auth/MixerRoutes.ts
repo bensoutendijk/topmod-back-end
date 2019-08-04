@@ -62,9 +62,13 @@ router.get('/callback',
   passport.authenticate('mixer', { failureRedirect: '/login' }), async (req, res) => {
     const { user: mixerProfile } = req;
     const { localAuth } = req;
-
-    const mixerUser = await OAuthUser.findOne({ user: { userid: mixerProfile._id } }) as OAuthUserModel;
     const localUser = await LocalUser.findById(localAuth._id) as ILocalUserModel;
+
+    console.log(localUser);
+
+    const mixerUser = await OAuthUser.findOne({ "user.userid": mixerProfile._id }) as OAuthUserModel;
+
+    console.log(mixerUser);
 
     if (mixerUser) {
       updateMixerUser(mixerProfile, mixerUser);
