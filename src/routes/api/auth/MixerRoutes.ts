@@ -3,7 +3,7 @@ import passport from 'passport';
 import express from 'express';
 
 import auth from '../../auth';
-import mixer from '../../mixer';
+import mixerAuth from '../../oauth';
 import { ILocalUserModel } from '../../../models/LocalUser';
 import { OAuthUserModel } from '../../../models/OAuthUser';
 
@@ -76,7 +76,7 @@ router.get('/callback',
     return res.redirect('/');
   });
 
-router.get('/current', auth.local.required, mixer.auth, async (req, res) => {
+router.get('/current', auth.local.required, mixerAuth, async (req, res) => {
   const { mixerUser } = req;
   if (mixerUser) {
     return res.send(mixerUser.user);

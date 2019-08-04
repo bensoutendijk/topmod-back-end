@@ -43,16 +43,28 @@ router.get('/', auth.local.required, async (req, res) => {
   res.send(data);
 });
 
-router.use('/:provider/:username/streams', (req: ProviderRequest, res, next) => {
-  const { params: { provider, username } } = req
-  req.provider = provider;
-  req.username = username;
+router.use('/:provider/:username/streams', auth.local.required, async (req: ProviderRequest, res, next) => {
+  const { localAuth: { _id } , params: { provider, username } } = req;
+
+  const { services } = await LocalUser.findById(_id) as ILocalUserModel;
+  const users = await OAuthUser.find({ _id: { $in: services } }) as OAuthUserModel[];
+
+  const service = users.filter(user => (
+    user.provider.toLowerCase() === provider.toLowerCase() &&
+    user.user.username.toLowerCase() === username.toLowerCase()
+  ))[0];
+
+  if (!service) {
+    next();
+  }
+
+  req.service = service
   next();
 }, streamsRoutes);
 
 interface ProviderRequest extends Request {
-  provider: string,
-  username: string,
+  localAuth: any;
+  service: any;
 }
 
 export default router;
