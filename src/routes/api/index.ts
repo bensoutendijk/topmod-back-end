@@ -6,6 +6,12 @@ import servicesRoutes from './services';
 
 const router = express.Router();
 
+router.get('/hello', (req, res) => {
+  const { body } = req;
+  console.log(body);
+  res.sendStatus(200);
+})
+
 router.use('/auth', authRoutes);
 router.use('/services', servicesRoutes);
 // router.use('/chat', chatRoutes);
