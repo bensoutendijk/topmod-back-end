@@ -6,7 +6,7 @@ import servicesRoutes from './services';
 
 const router = express.Router();
 
-router.get('/hello', (req, res) => {
+router.post('/hello', (req, res) => {
   const { body } = req;
   console.log(body);
   res.sendStatus(200);
